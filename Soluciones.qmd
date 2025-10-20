@@ -1,0 +1,234 @@
+---
+title: "Soluciones - Trabajo individual Teoría de la Decisión"
+format: html
+editor: visual
+---
+
+# Introducción
+
+En este documento se presentan las **soluciones** a los dos problemas planteados en el trabajo individual de la asignatura **Teoría de la Decisión**.  
+Los ejercicios se resuelven aplicando distintos **criterios de decisión bajo incertidumbre**, utilizando funciones del repositorio [TDecisionCodigo](https://github.com/calote/TDecisionCodigo).
+
+---
+
+# Carga de funciones y preparación del entorno
+
+```{r}
+# ---- BLOQUE 1: Preparación del entorno ----
+
+# Instalar y cargar knitr (para las tablas)
+if(!requireNamespace("knitr", quietly = TRUE)) install.packages("knitr")
+library(knitr)
+
+# Cargar el fichero con las funciones de decisión (ajusta la ruta según tu carpeta)
+source("TDecisionCodigo-master/teoriadecision_funciones_incertidumbre.R")
+```
+
+```{r}
+# ---- BLOQUE 2: Definir la matriz de beneficios ----
+
+mat1 <- matrix(c(10,5,8,
+                 4,6,3,
+                 7,9,2,
+                 5,4,6),
+               nrow = 4, byrow = TRUE)
+
+rownames(mat1) <- c("d1","d2","d3","d4")
+colnames(mat1) <- c("e1","e2","e3")
+
+# Mostrar matriz en tabla
+knitr::kable(mat1, caption = "Matriz de beneficios (miles de euros)")
+```
+
+```{r}
+# ---- BLOQUE 3: Aplicar todos los criterios (criterio.Todos) ----
+
+# favorable = TRUE indica que la matriz representa beneficios
+# alfa = 0.3 es el coeficiente de optimismo de Hurwicz
+tabla1 <- criterio.Todos(mat1, alfa = 0.3, favorable = TRUE)
+
+# Mostrar la tabla con todos los resultados
+knitr::kable(tabla1, caption = "Resultados de los criterios - Problema 1 (beneficios)")
+
+```
+
+```{r}
+# ---- BLOQUE 4: Criterio de Hurwicz con diferentes valores de alfa ----
+
+# α = 0.3 (más pesimista)
+res_hur_03 <- criterio.Hurwicz(mat1, alfa = 0.3, favorable = TRUE)
+
+# α = 0.7 (más optimista)
+res_hur_07 <- criterio.Hurwicz(mat1, alfa = 0.7, favorable = TRUE)
+```
+
+```{r}
+# ---- BLOQUE 5: Decisiones óptimas según Hurwicz ----
+
+# Función auxiliar para obtener el nombre de la decisión a partir del índice
+get_decision_names <- function(res_list, mat) {
+  idx <- res_list$AlternativaOptima
+  idx_num <- as.integer(idx)
+  if (all(is.na(idx_num))) return(NA)
+  paste(rownames(mat)[idx_num], collapse = ", ")
+}
+
+# Obtener nombres de las decisiones óptimas
+dec_hur_03 <- get_decision_names(res_hur_03, mat1)
+dec_hur_07 <- get_decision_names(res_hur_07, mat1)
+
+# Crear tabla resumen
+resumen_hur <- data.frame(
+  Alpha = c(0.3, 0.7),
+  Decision_optima = c(dec_hur_03, dec_hur_07),
+  ValorOptimo = c(res_hur_03$ValorOptimo, res_hur_07$ValorOptimo),
+  stringsAsFactors = FALSE
+)
+
+# Mostrar tabla resumen
+knitr::kable(resumen_hur, caption = "Decisiones óptimas según Hurwicz (α = 0.3 y α = 0.7)")
+```
+
+```{r}
+# ---- BLOQUE 6: Valores de Hurwicz por alternativa ----
+
+vals_hur03 <- data.frame(
+  Alternativa = rownames(mat1),
+  ValorHurwicz_0.3 = as.numeric(res_hur_03$ValorAlternativas),
+  ValorHurwicz_0.7 = as.numeric(res_hur_07$ValorAlternativas)
+)
+
+knitr::kable(vals_hur03, caption = "Valores de Hurwicz por alternativa (α=0.3 y α=0.7)")
+```
+
+### Interpretación del problema 1
+
+Después de aplicar todos los criterios de decisión bajo incertidumbre, se ve que la alternativa `d1` destaca claramente en casi todos los enfoques.
+
+- El **criterio de Wald** (Maximin) elige `d1` porque su peor resultado (5) es mejor que el de las demás.
+- El **criterio Optimista** (Maximax) también se queda con `d1`, ya que tiene el mejor resultado posible: 10.
+- Con **Hurwicz**, que combina optimismo y pesimismo, se observa lo siguiente:
+  - Con α = 0.3 (más pesimista), el valor óptimo es 6.5 y la mejor alternativa sigue siendo `d1`.
+  - Con α = 0.7 (más optimista), el valor óptimo sube a 8.5, pero la alternativa óptima sigue siendo `d1`.
+  Esto indica que, incluso cambiando el nivel de optimismo, `d1` se mantiene como la opción más equilibrada.
+- El **criterio de Savage** (Minimax Regret) también favorece a `d1`, con el menor arrepentimiento posible.
+- **Laplace**, que considera todos los estados igual de probables, da como mejor alternativa a `d1`, con un promedio de 7.667.
+- En el **Punto Ideal**, que busca la alternativa más cercana al mejor resultado en cada estado, `d1` vuelve a ser la más cercana.
+- Y en el criterio de **Veces Óptima**, `d1` es la única que aparece como óptima en más de una ocasión (6 veces), mientras que las demás no aparecen ninguna.
+
+En resumen, todos los criterios coinciden en que `d1` es la alternativa más sólida y equilibrada. Aunque `d3` tiene un valor alto en un estado, no logra destacar en los demás. Así que, si tuviera que tomar una decisión con esta información, `d1` sería claramente la más recomendable.
+
+
+
+# Problema 2
+
+```{r}
+# ---- BLOQUE 2: Definir la matriz de costes ----
+
+# Costes mensuales por aseguradora
+cuotas <- c(Security = 30, Curadita = 60, Preventiva = 40)
+
+# Costes médicos
+visitas <- 600
+parto <- 3000
+
+# Costes totales por alternativa y escenario
+# e1: No embarazada → solo cuota anual
+# e2: Embarazo y parto dentro del año
+# e3: Embarazo pero parto después del año
+
+costes_security <- c(
+  cuotas["Security"] * 12,
+  cuotas["Security"] * 12 + 0.5 * (visitas + parto),
+  cuotas["Security"] * 12 + 0.5 * visitas
+)
+
+costes_curadita <- c(
+  cuotas["Curadita"] * 12,
+  cuotas["Curadita"] * 12,
+  cuotas["Curadita"] * 12
+)
+
+costes_preventiva <- c(
+  cuotas["Preventiva"] * 12,
+  cuotas["Preventiva"] * 12 + visitas,
+  cuotas["Preventiva"] * 12 + visitas
+)
+
+# Construir la matriz
+mat2 <- rbind(costes_security, costes_curadita, costes_preventiva)
+rownames(mat2) <- c("Security", "Curadita", "Preventiva")
+colnames(mat2) <- c("e1", "e2", "e3")
+
+# Mostrar matriz
+knitr::kable(mat2, caption = "Matriz de costes totales por aseguradora y escenario")
+
+```
+
+```{r}
+# ---- BLOQUE 3: Aplicar criterios de decisión bajo incertidumbre ----
+
+# Aplicar todos los criterios con alfa = 0.6
+tabla2 <- criterio.Todos(mat2, alfa = 0.6, favorable = FALSE)
+
+# Mostrar resultados
+knitr::kable(tabla2, caption = "Resultados de los criterios - Problema 2 (costes)")
+
+```
+
+```{r}
+# ---- BLOQUE 4: Criterio de Hurwicz con α = 0.6 ----
+
+res_hur_06 <- criterio.Hurwicz(mat2, alfa = 0.6, favorable = FALSE)
+
+# Función auxiliar para obtener el nombre de la decisión óptima
+get_decision_names <- function(res_list, mat) {
+  idx <- res_list$AlternativaOptima
+  idx_num <- as.integer(idx)
+  if (all(is.na(idx_num))) return(NA)
+  paste(rownames(mat)[idx_num], collapse = ", ")
+}
+
+# Obtener nombre de la alternativa óptima
+dec_hur_06 <- get_decision_names(res_hur_06, mat2)
+
+# Crear tabla resumen
+resumen_hur <- data.frame(
+  Alpha = 0.6,
+  Decision_optima = dec_hur_06,
+  ValorOptimo = res_hur_06$ValorOptimo,
+  stringsAsFactors = FALSE
+)
+
+knitr::kable(resumen_hur, caption = "Decisión óptima según Hurwicz (α = 0.6)")
+
+```
+
+```{r}
+
+# ---- BLOQUE 5: Valores de Hurwicz por alternativa ----
+
+vals_hur <- data.frame(
+  Alternativa = rownames(mat2),
+  ValorHurwicz_0.6 = as.numeric(res_hur_06$ValorAlternativas)
+)
+
+knitr::kable(vals_hur, caption = "Valores de Hurwicz por alternativa (α = 0.6)")
+```
+
+### Interpretación del problema 2
+
+En este problema, Ana está valorando contratar un seguro médico privado y quiere minimizar el coste total durante el primer año, sin saber con certeza si quedará embarazada ni cuándo dará a luz. Se han evaluado tres aseguradoras: **Security**, **Curadita** y **Preventiva**, en función de tres escenarios posibles.
+
+Al aplicar los criterios de decisión bajo incertidumbre:
+
+- El **criterio de Wald** (Maximin) elige **Curadita**, porque su peor escenario (720€) es mejor que el peor de las otras dos opciones.
+- El **criterio Optimista** (Maximax), que se fija en el mejor escenario posible, selecciona **Security**, ya que en el escenario sin embarazo solo cuesta 360€.
+- Con **Hurwicz** (α = 0.6), que mezcla optimismo y pesimismo, hay empate entre **Curadita** y **Preventiva**, ambas con un valor de 1080€.
+- El **criterio de Savage** (Minimax Regret) favorece claramente a **Curadita**, ya que es la opción con menor arrepentimiento posible.
+- El **criterio de Laplace**, que considera todos los escenarios igual de probables, también da como mejor alternativa a **Curadita**.
+- En el **Punto Ideal**, que busca la alternativa más cercana al mejor resultado en cada escenario, **Curadita** vuelve a ser la más equilibrada.
+- Y en el criterio de **Veces Óptima**, **Curadita** aparece como la mejor opción en 5 de los 7 criterios aplicados, mientras que las otras solo aparecen una vez.
+
+En resumen, aunque **Security** tiene el coste más bajo en el mejor escenario, **Curadita** es la opción más estable y segura en todos los escenarios posibles. Si Ana quiere evitar sorpresas y mantener el coste bajo control, **Curadita** sería la alternativa más recomendable.
+
