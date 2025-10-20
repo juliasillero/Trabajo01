@@ -1,0 +1,71 @@
+---
+title: "Enunciados - Trabajo individual Teoría de la Decisión"
+format: html
+editor: visual
+---
+
+# Problemas de Teoría de la Decisión bajo Incertidumbre
+
+## Problema 1: Tabla de decisión inventada
+
+Una empresa debe elegir entre cuatro estrategias posibles:  
+- **d1**: Invertir en publicidad  
+- **d2**: Lanzar un nuevo producto  
+- **d3**: Expandirse a otro mercado  
+- **d4**: Mantener la estrategia actual  
+
+Frente a tres escenarios económicos:  
+- **e1**: Crecimiento del mercado  
+- **e2**: Estancamiento  
+- **e3**: Recesión  
+
+Los beneficios esperados (en miles de euros) son:
+
+|        | e1 | e2 | e3 |
+|--------|----:|----:|----:|
+| d1     | 10 |  5 |  8 |
+| d2     |  4 |  6 |  3 |
+| d3     |  7 |  9 |  2 |
+| d4     |  5 |  4 |  6 |
+
+Este problema se resolverá aplicando los siguientes criterios de decisión bajo incertidumbre:
+
+- **Maximax**  
+- **Maximin**  
+- **Laplace**  
+- **Hurwicz** (con α = 0.3 y α = 0.7)  
+- **Minimax Regret**
+
+Se analizará tanto en situación **favorable** (beneficios) como **desfavorable** (costes), transformando la matriz si es necesario. Al final se extraerá una conclusión sobre cuál sería la mejor estrategia según cada criterio.
+
+---
+
+## Problema 2: Seguro médico (situación realista)
+
+Ana está valorando contratar un seguro médico privado. Tiene tres opciones:
+
+- **Security**: Cuota mensual de 30€, cubre solo el 50% de los gastos durante el primer año.  
+- **Curadita**: Cuota mensual de 60€, cubre todos los gastos desde el principio.  
+- **Preventiva**: Cuota mensual de 40€, cubre todo excepto el ingreso en clínica.
+
+Ana cree que puede quedarse embarazada y dar a luz antes o después de cumplir un año con el seguro. Los gastos estimados si queda embarazada son:
+
+- Visitas médicas, análisis, ecografías, etc.: **600€**  
+- Parto (ingreso en clínica): **3000€**
+
+Los escenarios posibles son:
+
+- **e1**: No queda embarazada durante el primer año  
+- **e2**: Queda embarazada y da a luz dentro del primer año  
+- **e3**: Queda embarazada pero da a luz después de cumplir el año
+
+Se construirá una matriz de **costes totales** para cada aseguradora en función del escenario. Se aplicarán los siguientes criterios de decisión bajo incertidumbre:
+
+- **Maximin**  
+- **Laplace**  
+- **Hurwicz** (con α = 0.6)  
+- **Minimax Regret**
+
+El objetivo será determinar cuál es la opción más recomendable para Ana si quiere **minimizar el coste total** durante el primer año.
+
+
