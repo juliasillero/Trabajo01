@@ -1,0 +1,15 @@
+---
+title: "Trabajo individual Teoría de la Decisión"
+format: html
+editor: visual
+---
+
+# Descripción del trabajo
+
+Este repositorio contiene el trabajo individual de la asignatura **Teoría de la Decisión**.
+
+Incluye:
+
+- Dos problemas inventados sobre decisiones bajo incertidumbre.
+- Resolución de los problemas con código R usando funciones del repositorio [TDecisionCodigo](https://github.com/calote/TDecisionCodigo).
+- Documentos con enunciados y soluciones.
